@@ -11,6 +11,7 @@ engine = create_engine('sqlite:///basic-TARDIS.db')
 class AtomicTable(Base):
     __tablename__ = 'AtomicTable'
 
+    # 'index' field is a primary key; no other significance:
     index = Column(Integer, primary_key=True)
     mass_number = Column("Mass Number", Integer)
     atomic_number = Column("Atomic Number", Integer)
@@ -35,6 +36,7 @@ def one_time_populate():
 		for i in range(len(data)):
 			for j in range(len(data[i]['Data'])):
 				row = data[i]['Data'][j]
+				# Tuple representing element:
 				element = AtomicTable(mass_number = row['Isotope'],atomic_number=data[i]['Atomic Number']
 					,symbol=row['Symbol'],isotopic_composition=row['Isotopic Composition'],
 					relative_atomic_mass=row['Relative Atomic Mass'],index = ind,

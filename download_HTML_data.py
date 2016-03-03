@@ -6,14 +6,19 @@ from bs4 import BeautifulSoup
 DATA_LINK = "http://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ele=&all=all&ascii=html"
 FILE_NAME = "raw_data.html"
 
+response = requests.get(DATA_LINK)
+
+# To check if a string contains any digits:
 def contains_digits(s):
     return any(char.isdigit() for char in s)
 
+# Returns atomic symbol for passed isotope:
 def atomic_symbol(raw_data,symbol):
 	if (contains_digits(raw_data.text.strip()) is False) and ( raw_data.text.strip() != symbol ):
 		return raw_data.text.strip()
 	return symbol
 
+# Takes HTML data (split by <td> tags) and creates a tuple, representing an element:
 def data_to_row(raw_data,symbol,repeat=True):
 	return_data = {}
 	# Hydrogen's isotopes : special case:
@@ -45,6 +50,7 @@ def data_to_row(raw_data,symbol,repeat=True):
 		return_data['Notes'] = ''
 	return return_data
 
+# Write atomic-table to JSON file:
 def write_to_json(file_name = FILE_NAME):
 	try:
 		html_file = open(file_name,'r')
@@ -63,7 +69,7 @@ def write_to_json(file_name = FILE_NAME):
 				C[len(C)-1].append(d(x).html())	
 		except:
 			continue
-	# Hard-code
+	# Hard-code ( for this website )
 	C[0]=C[0][2:]
 	C[-1]=C[-1][:1]
 	# Main array to store itnermediate data:
@@ -78,6 +84,7 @@ def write_to_json(file_name = FILE_NAME):
 	for elements in C:
 		temp_group = {}
 		temp_list = []
+		# To check for atomic number (same for isotopes):
 		repeated = False
 		for isotopes in elements:
 			soup = BeautifulSoup(isotopes)
@@ -98,11 +105,11 @@ def write_to_json(file_name = FILE_NAME):
 	    json.dump(mainDB, outfile)
 	outfile.close()
 
+# Download HTML page and parse it's content to JSON:
 def HTML_parse(data_link = DATA_LINK,file_name = FILE_NAME):
-	response = requests.get(DATA_LINK)
 	try:
 		outfile = open(file_name, 'w')
-		outfile.write(r.text)
+		outfile.write(response.text)
 		outfile.close()
 	except:
 		print "I/O Error"
