@@ -6,7 +6,7 @@ import json
 
 JSON_FILENAME = "periodic_table.json"
 Base = declarative_base()
-engine = create_engine('sqlite:///basic-TARDIS3.db')
+engine = create_engine('sqlite:///basic-TARDIS.db')
 
 class AtomicTable(Base):
     __tablename__ = 'AtomicTable'
@@ -42,6 +42,7 @@ def one_time_populate():
 				ind += 1
 				session.add(element)
 		session.commit()
-		print "Database created"
+		return True
 	except:
 		print "DB related error (maybe DB exists already)"
+		return False

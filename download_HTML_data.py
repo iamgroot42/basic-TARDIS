@@ -6,12 +6,6 @@ from bs4 import BeautifulSoup
 DATA_LINK = "http://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ele=&all=all&ascii=html"
 FILE_NAME = "raw_data.html"
 
-# try:
-# 	response =wget.download(DATA_LINK,out=FILE_NAME)
-# except:
-# 	print "AVOCADO"
-# 	exit()
-
 def contains_digits(s):
     return any(char.isdigit() for char in s)
 
@@ -88,6 +82,9 @@ def write_to_json(file_name = FILE_NAME):
 		for isotopes in elements:
 			soup = BeautifulSoup(isotopes)
 			row = soup.find_all("td")
+			# Special case (Hydrogen) :
+			if a_no == 1:
+				a_symbol = atomic_symbol(row[0],a_symbol)
 			a_symbol = atomic_symbol(row[1],a_symbol)
 			temp_group['Atomic Number'] = str(a_no)
 			yolo = data_to_row(row,a_symbol,repeated)
