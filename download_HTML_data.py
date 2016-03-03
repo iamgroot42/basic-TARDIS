@@ -1,5 +1,5 @@
-import wget
 import json
+import requests
 from pyquery import PyQuery as pq
 from bs4 import BeautifulSoup
 
@@ -96,10 +96,14 @@ def write_to_json(file_name = FILE_NAME):
 	# Writing JSON object to file:
 	with open('periodic_table.json', 'w') as outfile:
 	    json.dump(mainDB, outfile)
+	outfile.close()
 
 def HTML_parse(data_link = DATA_LINK,file_name = FILE_NAME):
+	response = requests.get(DATA_LINK)
 	try:
-		response = wget.download(data_link,out = file_name)
+		outfile = open(file_name, 'w')
+		outfile.write(r.text)
+		outfile.close()
 	except:
-		print "Error downloading file"
-	write_to_json(FILE_NAME)
+		print "I/O Error"
+	write_to_json(file_name)

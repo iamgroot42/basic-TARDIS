@@ -1,5 +1,5 @@
-import populate_database as p
 import download_HTML_data as d
+import populate_database as p
 
 d.HTML_parse()
 success = p.one_time_populate()
