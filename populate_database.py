@@ -15,19 +15,20 @@ class AtomicTable(Base):
     index = Column(Integer, primary_key=True)
     mass_number = Column("Mass Number", Integer)
     atomic_number = Column("Atomic Number", Integer)
-    symbol = Column("Symbol",String(5))
-    isotopic_composition =  Column("Isotopic Composition",String(50))
-    relative_atomic_mass =  Column("Relative Atomic Mass",String(50))
-    standard_atomic_weight =  Column("Standard Atomic Weight",String(50))
-    notes =  Column("Notes",String(50))
+    symbol = Column("Symbol", String(5))
+    isotopic_composition =  Column("Isotopic Composition", String(50))
+    relative_atomic_mass =  Column("Relative Atomic Mass", String(50))
+    standard_atomic_weight =  Column("Standard Atomic Weight", String(50))
+    notes =  Column("Notes", String(50))
 
 Base.metadata.create_all(engine)
+
 
 def one_time_populate():
 	Session = sessionmaker(bind = engine)
 	session = Session()
 	try:
-		f = open(JSON_FILENAME,'r')
+		f = open(JSON_FILENAME, 'r')
 		data = json.load(f)
 	except:
 		print "I/O error"
@@ -37,10 +38,10 @@ def one_time_populate():
 			for j in range(len(data[i]['Data'])):
 				row = data[i]['Data'][j]
 				# Tuple representing element:
-				element = AtomicTable(mass_number = row['Isotope'],atomic_number=data[i]['Atomic Number']
-					,symbol=row['Symbol'],isotopic_composition=row['Isotopic Composition'],
-					relative_atomic_mass=row['Relative Atomic Mass'],index = ind,
-					standard_atomic_weight=row['Standard Atomic Weight'],notes=row['Notes'])
+				element = AtomicTable(mass_number = row['Isotope'], atomic_number = data[i]['Atomic Number'],
+					symbol = row['Symbol'], isotopic_composition = row['Isotopic Composition'],
+					relative_atomic_mass = row['Relative Atomic Mass'], index = ind,
+					standard_atomic_weight = row['Standard Atomic Weight'], notes = row['Notes'])
 				ind += 1
 				session.add(element)
 		session.commit()

@@ -12,14 +12,16 @@ response = requests.get(DATA_LINK)
 def contains_digits(s):
     return any(char.isdigit() for char in s)
 
+
 # Returns atomic symbol for passed isotope:
-def atomic_symbol(raw_data,symbol):
+def atomic_symbol(raw_data, symbol):
 	if (contains_digits(raw_data.text.strip()) is False) and ( raw_data.text.strip() != symbol ):
 		return raw_data.text.strip()
 	return symbol
 
+
 # Takes HTML data (split by <td> tags) and creates a tuple, representing an element:
-def data_to_row(raw_data,symbol,repeat=True):
+def data_to_row(raw_data, symbol, repeat = True):
 	return_data = {}
 	# Hydrogen's isotopes : special case:
 	if repeat:
@@ -49,6 +51,7 @@ def data_to_row(raw_data,symbol,repeat=True):
 	except:
 		return_data['Notes'] = ''
 	return return_data
+
 
 # Write atomic-table to JSON file:
 def write_to_json(file_name = FILE_NAME):
@@ -91,10 +94,10 @@ def write_to_json(file_name = FILE_NAME):
 			row = soup.find_all("td")
 			# Special case (Hydrogen) :
 			if a_no == 1:
-				a_symbol = atomic_symbol(row[0],a_symbol)
-			a_symbol = atomic_symbol(row[1],a_symbol)
+				a_symbol = atomic_symbol(row[0], a_symbol)
+			a_symbol = atomic_symbol(row[1], a_symbol)
 			temp_group['Atomic Number'] = str(a_no)
-			yolo = data_to_row(row,a_symbol,repeated)
+			yolo = data_to_row(row, a_symbol, repeated)
 			temp_list.append(yolo)
 			repeated = True
 		a_no += 1
@@ -105,8 +108,9 @@ def write_to_json(file_name = FILE_NAME):
 	    json.dump(mainDB, outfile)
 	outfile.close()
 
+
 # Download HTML page and parse it's content to JSON:
-def HTML_parse(data_link = DATA_LINK,file_name = FILE_NAME):
+def HTML_parse(data_link = DATA_LINK, file_name = FILE_NAME):
 	try:
 		outfile = open(file_name, 'w')
 		outfile.write(response.text)
