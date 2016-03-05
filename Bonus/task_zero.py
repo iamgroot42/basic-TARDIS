@@ -3,7 +3,7 @@
 # C4s, C6s, and the 3 largest eigenvector components.
 
 import requests
-from pyparsing import oneOf, nums, alphas, restOfLine, alphanums
+from pyparsing import oneOf, nums, alphas, restOfLine, alphanums, printables, empty
 from pyparsing import Word, Optional, CharsNotIn, White, Group
 
 OLE = "14.01"
@@ -16,6 +16,31 @@ raw_data = f.read()
 lel = raw_data.splitlines()
 
 
+def mapping(data):
+	mapping = {}
+	map_parse1 = CharsNotIn(' ') + White() + Word(alphanums) + White(exact=1) + Word(alphanums) + White(min=2) + restOfLine
+	map_parse2 = CharsNotIn(' ') + White() + Word(alphanums) + White(min=2) + restOfLine
+	for row in data:
+		row_copy = row
+		while len(row_copy) > 0:
+			try:
+				temp = map_parse1.parseString(row_copy)
+				mapping[temp[0]] = ' '.join([temp[2],temp[4]])
+				row_copy = temp[-1]
+			except:
+				try:
+					temp = map_parse2.parseString(row_copy)
+					mapping[temp[0]] = temp[2]
+					row_copy = temp[-1]
+				except:
+					# Mappings must be complete
+					return mapping
+
+param = lel[1:17]
+first_mapping = mapping(param)
+print x
+
+exit()	
 
 # scientific_number = Optional("-") + Word(nums,exact=1) + "." + Word(nums,min=2) + "E" + oneOf(["+","-"]) + Word(nums,min=2)
 
