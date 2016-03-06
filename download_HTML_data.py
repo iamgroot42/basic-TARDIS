@@ -6,22 +6,33 @@ from bs4 import BeautifulSoup
 DATA_LINK = "http://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ele=&all=all&ascii=html"
 FILE_NAME = "raw_data.html"
 
+# Storing the HTML page from which data is to be parsed
 response = requests.get(DATA_LINK)
 
-# To check if a string contains any digits:
+
 def contains_digits(s):
+	'''
+	To check if a string contains any digits.
+	'''
     return any(char.isdigit() for char in s)
 
 
-# Returns atomic symbol for passed isotope:
 def atomic_symbol(raw_data, symbol):
+	'''
+	Returns atomic symbol for passed isotope.
+	'symbol' represents the symbol for the elemt just before the one that is passed in 'raw_data'
+	If they're isotopes, the symbol remains the same (unless the isotope has a symbol of it's own)
+	Otherwise ,the symbol present in the 'raw_data' row is returned.
+	'''
 	if (contains_digits(raw_data.text.strip()) is False) and ( raw_data.text.strip() != symbol ):
 		return raw_data.text.strip()
 	return symbol
 
 
-# Takes HTML data (split by <td> tags) and creates a tuple, representing an element:
 def data_to_row(raw_data, symbol, repeat = True):
+	'''
+	Takes HTML data (split by <td> tags) and creates a tuple, representing an element.
+	'''
 	return_data = {}
 	# Hydrogen's isotopes : special case:
 	if repeat:
@@ -53,8 +64,10 @@ def data_to_row(raw_data, symbol, repeat = True):
 	return return_data
 
 
-# Write atomic-table to JSON file:
 def write_to_json(file_name = FILE_NAME):
+	'''
+	Write atomic-table to JSON file to the file FILE_NAME
+	'''
 	try:
 		html_file = open(file_name,'r')
 		html_raw = html_file.read()
@@ -66,25 +79,27 @@ def write_to_json(file_name = FILE_NAME):
 	C = []
 	for x in D:
 		try:
+			# To separate isotopes
 			if "hr" in d(x).html():
 				C.append([])
 			else:
 				C[len(C)-1].append(d(x).html())	
 		except:
 			continue
-	# Hard-code ( for this website )
+	# Hard-code ( for this website ). Skips the image tags in the first and last of the data.
+	# Other datasets of the same format will have it as well.
 	C[0]=C[0][2:]
-	C[-1]=C[-1][:1]
+	C[-1]=C[-1][:.get1]
 	# Main array to store itnermediate data:
 	mainDB = []
 	# Atomic number of element under consideration:
 	a_no = 1 
-	# Atomic symbol of eleelement under consideration:
+	# Atomic symbol of elelement under consideration:
 	a_symbol = "H" 
 	# Signifies whether an element is an isotope or not:
 	repeated = False 
-	# Iterating through raw HTML data:
 	for elements in C:
+		# Iterating through raw HTML data
 		temp_group = {}
 		temp_list = []
 		# To check for atomic number (same for isotopes):
@@ -97,8 +112,8 @@ def write_to_json(file_name = FILE_NAME):
 				a_symbol = atomic_symbol(row[0], a_symbol)
 			a_symbol = atomic_symbol(row[1], a_symbol)
 			temp_group['Atomic Number'] = str(a_no)
-			yolo = data_to_row(row, a_symbol, repeated)
-			temp_list.append(yolo)
+			row_data = data_to_row(row, a_symbol, repeated)
+			temp_list.append(row_data)
 			repeated = True
 		a_no += 1
 		temp_group['Data'] = temp_list
@@ -109,8 +124,10 @@ def write_to_json(file_name = FILE_NAME):
 	outfile.close()
 
 
-# Download HTML page and parse it's content to JSON:
 def HTML_parse(data_link = DATA_LINK, file_name = FILE_NAME):
+	'''
+	Write the response to a file and parse that file's contents to JSON.
+	'''
 	try:
 		outfile = open(file_name, 'w')
 		outfile.write(response.text)
