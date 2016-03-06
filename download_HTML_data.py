@@ -14,7 +14,7 @@ def contains_digits(s):
 	'''
 	To check if a string contains any digits.
 	'''
-    return any(char.isdigit() for char in s)
+	return any(char.isdigit() for char in s)
 
 
 def atomic_symbol(raw_data, symbol):
@@ -89,7 +89,7 @@ def write_to_json(file_name = FILE_NAME):
 	# Hard-code ( for this website ). Skips the image tags in the first and last of the data.
 	# Other datasets of the same format will have it as well.
 	C[0]=C[0][2:]
-	C[-1]=C[-1][:.get1]
+	C[-1]=C[-1][:1]
 	# Main array to store itnermediate data:
 	mainDB = []
 	# Atomic number of element under consideration:
