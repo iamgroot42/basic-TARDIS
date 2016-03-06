@@ -10,11 +10,6 @@ engine = create_engine('sqlite:///basic-TARDIS.db')
 
 
 class AtomicTable(Base):
-	'''
-	A schema for the database.
-	The 'index' field does not have any significance in the data; it is just an additional field
-	to serve as a primary key.
-	'''
     __tablename__ = 'AtomicTable'
 
     index = Column(Integer, primary_key=True)
