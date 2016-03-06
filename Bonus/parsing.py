@@ -6,6 +6,7 @@ DATA_LINK = "http://kurucz.harvard.edu/atoms/1401/gf1401.gam"
 FIRST_MAPPING = {}
 SECOND_MAPPING = {}
 GLOBAL_GRAMMAR = []
+PARSED_DATA = []
 COLUMNS = ["ELEM", "index(J)", "E(cm-1)", "J", "label", "g Lande'", "sum A", "C4", "C6", "sum f", "3 largest eigenvector components"]
 
 def parse_mapping(data):
@@ -63,15 +64,20 @@ def parse_data():
 			print "GET request failed : check Internet connection"
 			return False
 
+	global FIRST_MAPPING
+	global SECOND_MAPPING
+	global PARSED_DATA
+	global GLOBAL_GRAMMAR
+
 	rawData = rawData.splitlines()
 	FIRST_MAPPING = parse_mapping(rawData[1:17])
 	SECOND_MAPPING = parse_mapping(rawData[17:33])
 	GLOBAL_GRAMMAR = grammar_list()
 	mainData = rawData[38:] 
 	for row in mainData:
-		print parse_string(row)
-
+		PARSED_DATA.append(parse_string(row))
 	return True
+
 
 def grammar_list():
 	'''
@@ -79,22 +85,25 @@ def grammar_list():
 	The grammars are as generic as possible. Thus, they should work for any file of the form gfxxyy.gam
 	Explanation for grammars :
 		- Scientific Number : (-)x.yE(+-)z, where the characters in brackets are optional, and 'x','y' and 'z' are
-		  numbers. Scientific notation dictates that x be in [0,9], so it only one digit.Also, y must be at least
-		  two digits long.
-		- Elem : The first entry in the dataset ; is of the form (-)x.y[ODD,EVEN], where 'x' and 'y' are the atomic number and charge respectively
+		    numbers. Scientific notation dictates that x be in [0,9], so it only one digit.Also, y must be at least
+		    two digits long.
+		- Bracket Config : Grammar for configurations which contain a bracket (like the second component of an 
+			eigenvector in the last coulm of given data).
+		- Elem : The first entry in the dataset ; is of the form (-)x.y[ODD,EVEN], where 'x' and 'y' are the atomic 
+		    number and charge respectively
 		- index(J) : a natural number.The optional '-' is added so that this grammar may be reused later.
 		- E : A number of the form (-)x.y, where 'x' and 'y' are numbers, and the '-' is optional.
 		- J : A number of the form x.y, where 'x' and 'y' are numbers.
-		- label : Rerpresents configuration. Extracted by taking away by other parts of the grammar, as defining a
-		  grammar for it is quite tricky. Doing so also avoids any errors that may have occured because of changes in
-		  the level's grammar.
-		- g Lande' : same form as 'E'
-		- sum A : same form as 'Scientific Number'
+		- Label : Rerpresents configuration. Extracted by taking away by other parts of the grammar, as defining a
+		    grammar for it is quite tricky. Doing so also avoids any errors that may have occured because of changes in
+		    the level's grammar.
+		- G Lande' : same form as 'E'
+		- Sum A : same form as 'Scientific Number'
 		- C4 : same form as 'Scientific Number'
 		- C6 : same form as 'Scientific Number'
-		- sum f : same form as 'E'
+		- Sum f : same form as 'E'
 		- Single eigenvector commponents : of the form X Y Z, where X is the same form as 'E', Y is 
-		  of the form 'bracket_config', and Z is a natural number. 
+		   of the form 'BRACKET_CONFIG', and Z is a natural number. 
 	'''
 	grammars = []
 
@@ -153,6 +162,40 @@ def parse_string(test):
 			break
 	return output
 
-status = parse_data()
-if status:
-	print "Parsed successfully!"
+
+def parse_final():
+	'''
+	Takes the parsed data( list of lists), and performs substitutions according to the mapping specified
+	as the start of the file. Applies first mapping for first half of the document, and second mapping 
+	for the second half.
+	The substitutions are performed by trying to match every field with the grammar below, and making
+	substitutions whenever the grammar's rule s satisfied.
+	'''
+	if not parse_data():
+		return False
+
+	global PARSED_DATA
+	global FIRST_MAPPING
+	global SECOND_MAPPING
+
+	SUBS = CharsNotIn('(') + "(" + Word(alphanums) + ")" + restOfLine
+	for row in PARSED_DATA:
+		for i in range(len(row)):
+			# First half of data ; first mapping will apply:
+			if len(row)>6:
+				try:
+					parsed = SUBS.parseString(row[i])
+					parsed[0] = FIRST_MAPPING[parsed[0]]
+					row[i] = ''.join(parsed)
+					# print parsed
+				except:
+					pass
+			# Second half of data ; second mapping will apply:
+			else:	
+				try:
+					parsed = SUBS.parseString(row[i])
+					parsed[0] = SECOND_MAPPING[parsed[0]]
+					row[i] = ''.join(parsed)
+				except:
+					pass
+	return True
