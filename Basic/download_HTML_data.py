@@ -6,9 +6,6 @@ from bs4 import BeautifulSoup
 DATA_LINK = "http://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ele=&all=all&ascii=html"
 FILE_NAME = "raw_data.html"
 
-# Storing the HTML page from which data is to be parsed
-response = requests.get(DATA_LINK)
-
 
 def contains_digits(s):
 	'''
@@ -128,10 +125,17 @@ def HTML_parse(data_link = DATA_LINK, file_name = FILE_NAME):
 	'''
 	Write the response to a file and parse that file's contents to JSON.
 	'''
+	#If file already exists, no need to download again
 	try:
-		outfile = open(file_name, 'w')
-		outfile.write(response.text)
-		outfile.close()
+		f = open(file_name,'r')
+		f.close()
 	except:
-		print "I/O Error"
+		try:
+			# Storing the HTML page from which data is to be parsed
+			response = requests.get(DATA_LINK)
+			outfile = open(file_name, 'w')
+			outfile.write(response.text)
+			outfile.close()
+		except:
+			print "I/O Error"
 	write_to_json(file_name)

@@ -10,16 +10,22 @@ engine = create_engine('sqlite:///basic-TARDIS.db')
 
 
 class AtomicTable(Base):
-    __tablename__ = 'AtomicTable'
+	'''		
+ 	A schema for the database.		
+ 	The 'index' field does not have any significance in the data; it is just an additional field		
+ 	to serve as a primary key.		
+	'''
 
-    index = Column(Integer, primary_key=True)
-    mass_number = Column("Mass Number", Integer)
-    atomic_number = Column("Atomic Number", Integer)
-    symbol = Column("Symbol", String(5))
-    isotopic_composition =  Column("Isotopic Composition", String(50))
-    relative_atomic_mass =  Column("Relative Atomic Mass", String(50))
-    standard_atomic_weight =  Column("Standard Atomic Weight", String(50))
-    notes =  Column("Notes", String(50))
+	__tablename__ = 'AtomicTable'
+
+	index = Column(Integer, primary_key=True)
+	mass_number = Column("Mass Number", Integer)
+	atomic_number = Column("Atomic Number", Integer)
+	symbol = Column("Symbol", String(5))
+	isotopic_composition =  Column("Isotopic Composition", String(50))
+	relative_atomic_mass =  Column("Relative Atomic Mass", String(50))
+	standard_atomic_weight =  Column("Standard Atomic Weight", String(50))
+	notes =  Column("Notes", String(50))
 
 # Setting up metadata
 Base.metadata.create_all(engine)
