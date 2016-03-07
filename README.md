@@ -8,5 +8,5 @@ Some scripts to download atomic elements' data, parse it and store it in a datab
 
 ##Running the scripts
 * ```pip install -r requirements``` to install dependencies
-* ```python Basic/task_zero.py``` to generate the DB
+* ```python task_zero.py``` to generate the DB
 * ```python Bonus/task_zero_bonus.py``` to parse data (Bonus objective)
