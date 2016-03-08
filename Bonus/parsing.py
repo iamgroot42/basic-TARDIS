@@ -3,10 +3,6 @@ from pyparsing import oneOf, nums, alphas, restOfLine, alphanums, printables, em
 from pyparsing import Word, Optional, CharsNotIn, White, Group, SkipTo, Or
 
 DATA_LINK = "http://kurucz.harvard.edu/atoms/1401/gf1401.gam"
-FIRST_MAPPING = {}
-SECOND_MAPPING = {}
-GLOBAL_GRAMMAR = []
-PARSED_DATA = []
 COLUMNS = ["ELEM", "index(J)", "E(cm-1)", "J", "label", "g Lande'", "sum A", "C4", "C6", "sum f", "3 largest eigenvector components"]
 
 def parse_mapping(data):
@@ -42,7 +38,7 @@ def parse_mapping(data):
 					return mapping
 
 
-def parse_data():	
+def parse_data(first_mapping, second_mapping, parsed_data):	
 	'''
 	Take the data which is to be parsed as input (a list of lines) and
 	creates an SQL database for the same.
@@ -64,19 +60,13 @@ def parse_data():
 			print "GET request failed : check Internet connection"
 			return False
 
-	global FIRST_MAPPING
-	global SECOND_MAPPING
-	global PARSED_DATA
-	global GLOBAL_GRAMMAR
-
 	rawData = rawData.splitlines()
-	FIRST_MAPPING = parse_mapping(rawData[1:17])
-	SECOND_MAPPING = parse_mapping(rawData[17:33])
-	GLOBAL_GRAMMAR = grammar_list()
+	first_mapping = parse_mapping(rawData[1:17])
+	second_mapping = parse_mapping(rawData[17:33])
 	mainData = rawData[38:] 
 	for row in mainData:
-		PARSED_DATA.append(parse_string(row))
-	return True
+		parsed_data.append(parse_string(row))
+	return (first_mapping, second_mapping)
 
 
 def grammar_list():
@@ -171,21 +161,22 @@ def parse_final():
 	The substitutions are performed by trying to match every field with the grammar below, and making
 	substitutions whenever the grammar's rule s satisfied.
 	'''
-	if not parse_data():
+
+	first_mapping = []
+	second_mapping = []
+	parsed_data = []
+
+	if not parse_data(first_mapping, second_mapping,parsed_data):
 		return False
 
-	global PARSED_DATA
-	global FIRST_MAPPING
-	global SECOND_MAPPING
-
 	SUBS = CharsNotIn('(') + "(" + Word(alphanums) + ")" + restOfLine
-	for row in PARSED_DATA:
+	for row in parsed_data:
 		for i in range(len(row)):
 			# First half of data ; first mapping will apply:
 			if len(row)>6:
 				try:
 					parsed = SUBS.parseString(row[i])
-					parsed[0] = FIRST_MAPPING[parsed[0]]
+					parsed[0] = first_mapping[parsed[0]]
 					row[i] = ''.join(parsed)
 					# print parsed
 				except:
@@ -194,8 +185,8 @@ def parse_final():
 			else:	
 				try:
 					parsed = SUBS.parseString(row[i])
-					parsed[0] = SECOND_MAPPING[parsed[0]]
+					parsed[0] = second_mapping[parsed[0]]
 					row[i] = ''.join(parsed)
 				except:
 					pass
-	return True
+	return parsed_data

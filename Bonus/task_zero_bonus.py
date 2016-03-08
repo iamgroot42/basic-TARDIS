@@ -1,8 +1,9 @@
 import parsing as p
 
-success = p.parse_final()
+print "Parsing..."
+data = p.parse_final()
 
-if success:
-	print p.PARSED_DATA
+if data:
+	print data
 else:
 	print "Parsing failed"
